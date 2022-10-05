@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from models import Stock
 from flask import request
+from predictor import get_predictions
 
 from stocks_data.stocks_data import get_all_data
 
@@ -51,7 +52,6 @@ class Stocks(Resource):
             description=data.get("description"),
             year_founded=data.get("year_founded"))
         new_stocks.save()
-
         return new_stocks, 201
 
 
@@ -108,3 +108,9 @@ class Stocks(Resource):
             "open": data["open"][-1][1],
             "previous_close": data["previous_close"]
         }
+
+@stock_ns.route('/<string:symbol>/predictions')
+class Stocks(Resource):
+
+    def get(self, symbol):
+        return get_predictions(symbol)
