@@ -1,6 +1,6 @@
 
 from prophet import Prophet
-from utils import get_close_price
+from stocks_data.stocks_data import get_close_price
 
 def get_predictions(symbol, periods=365):
   data = get_close_price(symbol)
