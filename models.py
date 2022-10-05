@@ -11,8 +11,10 @@ class Stock:
     description: string
     year_founded: integer
 """
+
+
 class Stock(db.Model):
-    __tablename__='stocks'
+    __tablename__ = 'stocks'
     id = db.Column(db.Integer(), primary_key=True)
     symbol = db.Column(db.String(10), nullable=False, unique=True)
     company_name = db.Column(db.String(100), nullable=False)
@@ -41,8 +43,10 @@ class Stock(db.Model):
         self.company_logo = kwargs.get('company_logo') or self.company_logo
         self.industry = kwargs.get('industry') or self.industry
         self.company_ceo = kwargs.get('company_ceo') or self.company_ceo
-        self.company_headquaters = kwargs.get('company_headquaters') or self.company_headquaters
-        self.company_website = kwargs.get('company_website') or self.company_website
+        self.company_headquaters = kwargs.get(
+            'company_headquaters') or self.company_headquaters
+        self.company_website = kwargs.get(
+            'company_website') or self.company_website
         self.description = kwargs.get('description') or self.description
         self.year_founded = kwargs.get('year_founded') or self.year_founded
         db.session.commit()
@@ -55,8 +59,10 @@ class User:
     email:string
     password:string
 """
+
+
 class User(db.Model):
-    __tablename__='users'
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), nullable=False, unique=True)
     email = db.Column(db.String(60), nullable=False, unique=True)
@@ -69,28 +75,31 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+
 """
 class Transactions:
-    owner_id:integer
-    stock_id:integer
-    buy_price:integer
-    buy_date:date
-    quantity:integer
+    id: integer
+    name: string
+    type: string
+    amount: float
+    stock: string
+    time_transacted: datetime
+    time_created: datetime
+    price_purchased_at: float
+    no_of_stocks: float
 """
+
+
 class Transaction(db.Model):
-    __tablename__='transactions'
+    __tablename__ = 'transactions'
     id = db.Column(db.Integer(), primary_key=True)
-    symbol = db.Column(db.String(10), nullable=False, unique=True)
-    type = db.Column(db.String(10), nullable=False, unique=True)
+    stock = db.Column(db.String(10), nullable=False)
+    type = db.Column(db.String(10))
     amount = db.Column(db.Float)
     time_transacted = db.Column(db.DateTime)
     time_created = db.Column(db.DateTime)
     price_purchased_at = db.Column(db.Float)
-    no_of_stocks = db.Column(db.Float)    
-
-
-    def __repr__(self):
-        return f"<User {self.username}>"
+    no_of_stocks = db.Column(db.Float)
 
     def save(self):
         db.session.add(self)
