@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from models import Stock
 from flask import request
 
-from stocks_data import get_data
+from stocks_data.stocks_data import get_all_data
 
 stock_ns = Namespace('stocks', description="""
     A namespace for stocks, contains routes related to stocks, routes to view extra information about a stock such it's historical prices.
@@ -91,13 +91,13 @@ class Stocks(Resource):
 class Stocks(Resource):
 
     def get(self, symbol):
-        return get_data(symbol)
+        return get_all_data(symbol)
 
 @stock_ns.route('/<string:symbol>/summary')
 class Stocks(Resource):
 
     def get(self, symbol):
-        data = get_data(symbol)
+        data = get_all_data(symbol)
         return {
             "name": symbol,
             "change": data['change'],
