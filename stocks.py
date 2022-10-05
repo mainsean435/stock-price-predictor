@@ -2,7 +2,9 @@ from flask_restx import Namespace, Resource, fields
 from models import Stock
 from flask import request
 
-stock_ns = Namespace('stock', description="""
+from stocks_data import get_data
+
+stock_ns = Namespace('stocks', description="""
     A namespace for stocks, contains routes related to stocks, routes to view extra information about a stock such it's historical prices.
      """)
 
@@ -10,7 +12,7 @@ stock_model = stock_ns.model(
     "Stock",
     {
         "id": fields.Integer(),
-        "ticker_symbol": fields.String(),
+        "symbol": fields.String(),
         "company_name": fields.String(),
         "company_logo": fields.String(),
         "industry": fields.String(),
@@ -18,11 +20,13 @@ stock_model = stock_ns.model(
         "company_headquaters": fields.String(),
         "company_website": fields.String(),
         "description": fields.String(),
-        "year_founded": fields.Integer()
+        "year_founded": fields.Integer(),
+        "data": fields.String()
     }
 )
 
-@stock_ns.route('/stocks')
+
+@stock_ns.route('/')
 class Stocks(Resource):
 
     @stock_ns.marshal_list_with(stock_model)
@@ -36,48 +40,68 @@ class Stocks(Resource):
 
         data = request.get_json()
         new_stocks = Stock(
-            ticker_symbol=data.get("ticker_symbol"),
+            symbol=data.get("symbol"),
             company_name=data.get("company_name"),
-            description=data.get("description"),
+            company_logo=data.get("company_logo"),
+            industry=data.get("industry"),
             company_ceo=data.get("company_ceo"),
             company_headquaters=data.get("company_headquaters"),
-            year_founded=data.get("year_founded"),
-            industry=data.get("industry"),
-            company_logo=data.get("company_logo"),
-            company_website=data.get("company_website")
-        )
+            company_website=data.get("company_website"),
+            description=data.get("description"),
+            year_founded=data.get("year_founded"))
         new_stocks.save()
 
         return new_stocks, 201
 
 
-@stock_ns.route('/stocks/<int:id>')
+@stock_ns.route('/<string:symbol>/info')
 class Stocks(Resource):
 
     @stock_ns.marshal_with(stock_model)
-    def get(self, id):
-        stock = Stock.query.get_or_404(id)
+    def get(self, symbol):
+        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
         return stock
 
     @stock_ns.marshal_with(stock_model)
-    def put(self, id):
-        stock_to_update = Stock.query.get_or_404(id)
+    def put(self, symbol):
+        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
         data = request.get_json()
 
-        stock_to_update.update(ticker_symbol=data.get("ticker_symbol"),
-                               company_name=data.get("company_name"),
-                               description=data.get("description"),
-                               company_ceo=data.get("company_ceo"),
-                               company_headquaters=data.get("company_headquaters"),
-                               year_founded=data.get("year_founded"),
-                               industry=data.get("industry"),
-                               company_logo=data.get("company_logo"),
-                               company_website=data.get("company_website"))
-        return stock_to_update
+        stock.update(symbol=data.get("symbol"),
+                     company_name=data.get("company_name"),
+                     company_logo=data.get("company_logo"),
+                     industry=data.get("industry"),
+                     company_ceo=data.get("company_ceo"),
+                     company_headquaters=data.get(
+            "company_headquaters"),
+            company_website=data.get("company_website"),
+            description=data.get("description"),
+            year_founded=data.get("year_founded"))
+        return stock
 
     @stock_ns.marshal_with(stock_model)
-    def delete(self, id):
-        stock_to_delete = Stock.query.get_or_404(id)
-        stock_to_delete.delete()
-        return stock_to_delete
+    def delete(self, symbol):
+        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
+        stock.delete()
+        return stock
 
+@stock_ns.route('/<string:symbol>/data')
+class Stocks(Resource):
+
+    def get(self, symbol):
+        return get_data(symbol)
+
+@stock_ns.route('/<string:symbol>/summary')
+class Stocks(Resource):
+
+    def get(self, symbol):
+        data = get_data(symbol)
+        return {
+            "name": symbol,
+            "change": data['change'],
+            "change_percent": data['change_percent'],
+            "high": data["high"][-1][1],
+            "low": data["low"][-1][-1],
+            "open": data["open"][-1][1],
+            "previous_close": data["previous_close"]
+        }
