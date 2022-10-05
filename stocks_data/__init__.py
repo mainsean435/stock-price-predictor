@@ -3,7 +3,7 @@ from datetime import datetime
 import config
 
 
-def get_data(symbol):
+def get_all_data(symbol):
   filepath = f"{config.BASE_DIR}/stocks_data/{symbol}.csv"
   df = pd.read_csv(filepath)
 
