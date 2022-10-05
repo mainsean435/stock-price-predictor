@@ -4,6 +4,7 @@ from flask import request
 
 from stocks_data.stocks_data import get_all_data
 
+
 stock_ns = Namespace('stocks', description="""
     A namespace for stocks, contains routes related to stocks, routes to view extra information about a stock such it's historical prices.
      """)
