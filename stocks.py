@@ -62,6 +62,8 @@ class Stocks(Resource):
         stock = Stock.query.filter_by(symbol=symbol).first_or_404()
         return stock
 
+@stock_ns.route('/<string:symbol>')
+class Stocks(Resource):
     @stock_ns.marshal_with(stock_model)
     def put(self, symbol):
         stock = Stock.query.filter_by(symbol=symbol).first_or_404()
