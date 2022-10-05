@@ -3,11 +3,13 @@ from exts import db
 """
 class Stock:
     id:int primary key
+    symbol: string
     company_ceo: string
     company_name: string
     company_logo: string
     industry: string
     description: string
+    year_founded: integer
 """
 class Stock(db.Model):
     __tablename__='stocks'
