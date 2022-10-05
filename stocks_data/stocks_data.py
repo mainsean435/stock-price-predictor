@@ -2,6 +2,7 @@ from distutils.command.config import config
 import pandas as pd
 from datetime import datetime
 import config
+from random import randint
 
 
 def get_all_data(symbol):
@@ -33,4 +34,10 @@ def get_close_price(symbol):
     df['Date'] = df['Date'].apply(
         lambda x: datetime.strptime(x, r'%Y-%m-%d'))
     return df[['Date', ' Close']]
+
+def get_live_price(symbol):
+    data = get_all_data(symbol)
+    price = data['previous_close'] + (randint(0, 30)/10)
+    return round(price, 2)
+    
 
