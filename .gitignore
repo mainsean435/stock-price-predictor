@@ -1,2 +1,4 @@
 .env
 tt/
+migrations/
+__pycache__/
