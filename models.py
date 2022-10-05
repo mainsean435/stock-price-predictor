@@ -77,7 +77,7 @@ class Transactions:
     buy_date:date
     quantity:integer
 """
-class Transactions(db.Model):
+class Transaction(db.Model):
     __tablename__='transactions'
     id = db.Column(db.Integer(), primary_key=True)
     symbol = db.Column(db.String(10), nullable=False, unique=True)
