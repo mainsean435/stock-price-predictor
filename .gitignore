@@ -52,4 +52,6 @@ docs/_build/
 //////////////////////
 .env
 tt/
+migrations
+
 
