@@ -1,117 +1,102 @@
+from config import DevConfig as cfg
 from flask_restx import Namespace, Resource, fields
-from models import Stock
-from flask import request
-from predictor import get_predictions
+from models import Transaction
+from flask import request, jsonify
+from datetime import datetime
+from collections import defaultdict
+from sqlalchemy import create_engine
 
-from stocks_data.stocks_data import get_all_data
+from stocks_data.stocks_data import get_live_price
 
 
-stock_ns = Namespace('stocks', description="""
-    A namespace for stocks, contains routes related to stocks, routes to view extra information about a stock such it's historical prices.
+transaction_ns = Namespace('transactions', description="""
+    A namespace for transactions, contains routes related to transactions, routes to add information about a stock purchase.
      """)
 
-stock_model = stock_ns.model(
-    "Stock",
+transaction_model = transaction_ns.model(
+    "Transaction",
     {
         "id": fields.Integer(),
-        "symbol": fields.String(),
-        "company_name": fields.String(),
-        "company_logo": fields.String(),
-        "industry": fields.String(),
-        "company_ceo": fields.String(),
-        "company_headquaters": fields.String(),
-        "company_website": fields.String(),
-        "description": fields.String(),
-        "year_founded": fields.Integer(),
-        "data": fields.String()
+        "type": fields.String(),
+        "amount": fields.Float(),
+        "stock": fields.String(),
+        "time_transacted": fields.DateTime(),
+        "time_created": fields.DateTime(),
+        "price_purchased_at": fields.Float(),
+        "no_of_shares": fields.Float()
     }
 )
 
 
-@stock_ns.route('/')
-class Stocks(Resource):
+@transaction_ns.route('/')
+class Transactions(Resource):
 
-    @stock_ns.marshal_list_with(stock_model)
+    @transaction_ns.marshal_list_with(transaction_model)
     def get(self):
-        stocks = Stock.query.all()
-        return stocks
+        transactions = Transaction.query.all()
+        transactions.sort(key=lambda x : x.time_transacted, reverse=True)
+        return transactions
 
-    @stock_ns.marshal_with(stock_model)
-    @stock_ns.expect(stock_model)
+    @transaction_ns.marshal_with(transaction_model)
+    @transaction_ns.expect(transaction_model)
     def post(self):
-
         data = request.get_json()
-        new_stocks = Stock(
-            symbol=data.get("symbol"),
-            company_name=data.get("company_name"),
-            company_logo=data.get("company_logo"),
-            industry=data.get("industry"),
-            company_ceo=data.get("company_ceo"),
-            company_headquaters=data.get("company_headquaters"),
-            company_website=data.get("company_website"),
-            description=data.get("description"),
-            year_founded=data.get("year_founded"))
-        new_stocks.save()
-
-        return new_stocks, 201
+        new_transaction = Transaction(
+            type=data.get("type"),
+            amount=data.get("amount"),
+            stock=data.get("stock"),
+            time_transacted=datetime.fromtimestamp(
+                int(data.get("time_transacted"))),
+            time_created=datetime.fromtimestamp(int(data.get("time_created"))),
+            price_purchased_at=data.get("price_purchased_at"),
+            no_of_shares=data.get("no_of_shares"))
+        new_transaction.save()
+        return new_transaction, 201
 
 
-@stock_ns.route('/<string:symbol>/info')
-class Stocks(Resource):
+@transaction_ns.route('/rollups_by_stock')
+class Transactions(Resource):
 
-    @stock_ns.marshal_with(stock_model)
-    def get(self, symbol):
-        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
-        return stock
+    def get(self):
+        portfolio = defaultdict(
+            lambda: {
+                "shares": 0,
+                "total_cost": 0,
+                "total_equity": 0,
+                "live_price": 0
+            }
+        )
 
-@stock_ns.route('/<string:symbol>')
-class Stocks(Resource):
-    @stock_ns.marshal_with(stock_model)
-    def put(self, symbol):
-        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
-        data = request.get_json()
+        engine = create_engine(cfg.SQLALCHEMY_DATABASE_URI)
+        with engine.connect() as con:
+            cur = con.execute(
+                "SELECT stock, type, SUM(amount)/100 AS total_amount, SUM(no_of_shares) AS total_shares FROM transactions GROUP BY stock, type")
+            rows = cur.fetchall()
+        for row in rows:
+            stock = row[0]
+            transaction_type = row[1]
+            transaction_amount = row[2]
+            transaction_shares = row[3]
 
-        stock.update(symbol=data.get("symbol"),
-                     company_name=data.get("company_name"),
-                     company_logo=data.get("company_logo"),
-                     industry=data.get("industry"),
-                     company_ceo=data.get("company_ceo"),
-                     company_headquaters=data.get(
-            "company_headquaters"),
-            company_website=data.get("company_website"),
-            description=data.get("description"),
-            year_founded=data.get("year_founded"))
-        return stock
+            if transaction_type == 'BOUGHT':
+                portfolio[stock]['total_cost'] += transaction_amount
+                portfolio[stock]['shares'] += transaction_shares
+            else:
+                portfolio[stock]['total_cost'] -= transaction_amount
+                portfolio[stock]['shares'] -= transaction_shares
 
-    @stock_ns.marshal_with(stock_model)
-    def delete(self, symbol):
-        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
-        stock.delete()
-        return stock
+        response = []
+        for stock in portfolio:
+            live_price = get_live_price(stock)
+            portfolio[stock]['live_price'] = live_price
+            portfolio[stock]['total_equity'] = portfolio[stock]['shares'] * live_price
 
-@stock_ns.route('/<string:symbol>/data')
-class Stocks(Resource):
+            response.append({
+                "stock": stock,
+                "live_price": portfolio[stock]['live_price'],
+                "total_equity": portfolio[stock]['total_equity'],
+                "shares": portfolio[stock]['shares'],
+                "total_cost": portfolio[stock]["total_cost"]
+            })
 
-    def get(self, symbol):
-        return get_all_data(symbol)
-
-@stock_ns.route('/<string:symbol>/summary')
-class Stocks(Resource):
-
-    def get(self, symbol):
-        data = get_all_data(symbol)
-        return {
-            "name": symbol,
-            "change": data['change'],
-            "change_percent": data['change_percent'],
-            "high": data["high"][-1][1],
-            "low": data["low"][-1][-1],
-            "open": data["open"][-1][1],
-            "previous_close": data["previous_close"]
-        }
-
-@stock_ns.route('/<string:symbol>/predictions')
-class Stocks(Resource):
-
-    def get(self, symbol):
-        return get_predictions(symbol)
+        return jsonify(response)
