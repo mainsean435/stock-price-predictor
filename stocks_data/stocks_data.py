@@ -11,7 +11,7 @@ def get_all_data(symbol):
 
   df = df.sort_values('Date')
   df['Date'] = df['Date'].apply(
-      lambda x: datetime.strptime(x, r'%Y-%m-%d').timestamp())
+      lambda x: datetime.strptime(x, r'%Y-%m-%d').timestamp()*1000)
 
   data = dict()
   data['open'] = df[['Date', ' Open']].values.tolist()
