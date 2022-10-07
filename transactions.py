@@ -6,7 +6,7 @@ from datetime import datetime
 from collections import defaultdict
 from sqlalchemy import create_engine
 
-from tickers_data.tickers_data import get_live_price
+from stocks_data.stocks_data import get_live_price
 
 
 transaction_ns = Namespace('transactions', description="""
