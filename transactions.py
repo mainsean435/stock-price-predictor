@@ -6,11 +6,11 @@ from datetime import datetime
 from collections import defaultdict
 from sqlalchemy import create_engine
 
-from stocks_data.stocks_data import get_live_price
+from tickers_data.tickers_data import get_live_price
 
 
 transaction_ns = Namespace('transactions', description="""
-    A namespace for transactions, contains routes related to transactions, routes to add information about a stock purchase.
+    A namespace for transactions, contains routes related to transactions, routes to add information about a ticker purchase.
      """)
 
 transaction_model = transaction_ns.model(
@@ -19,7 +19,7 @@ transaction_model = transaction_ns.model(
         "id": fields.Integer(),
         "type": fields.String(),
         "amount": fields.Float(),
-        "stock": fields.String(),
+        "ticker": fields.String(),
         "time_transacted": fields.DateTime(),
         "time_created": fields.DateTime(),
         "price_purchased_at": fields.Float(),
@@ -44,7 +44,7 @@ class Transactions(Resource):
         new_transaction = Transaction(
             type=data.get("type"),
             amount=data.get("amount"),
-            stock=data.get("stock"),
+            ticker=data.get("ticker"),
             time_transacted=datetime.fromtimestamp(
                 int(data.get("time_transacted"))),
             time_created=datetime.fromtimestamp(int(data.get("time_created"))),
@@ -54,7 +54,7 @@ class Transactions(Resource):
         return new_transaction, 201
 
 
-@transaction_ns.route('/rollups_by_stock')
+@transaction_ns.route('/rollups_by_ticker')
 class Transactions(Resource):
 
     def get(self):
@@ -70,33 +70,33 @@ class Transactions(Resource):
         engine = create_engine(cfg.SQLALCHEMY_DATABASE_URI)
         with engine.connect() as con:
             cur = con.execute(
-                "SELECT stock, type, SUM(amount)/100 AS total_amount, SUM(no_of_shares) AS total_shares FROM transactions GROUP BY stock, type")
+                "SELECT ticker, type, SUM(amount)/100 AS total_amount, SUM(no_of_shares) AS total_shares FROM transactions GROUP BY ticker, type")
             rows = cur.fetchall()
         for row in rows:
-            stock = row[0]
+            ticker = row[0]
             transaction_type = row[1]
             transaction_amount = row[2]
             transaction_shares = row[3]
 
             if transaction_type == 'BOUGHT':
-                portfolio[stock]['total_cost'] += transaction_amount
-                portfolio[stock]['shares'] += transaction_shares
+                portfolio[ticker]['total_cost'] += transaction_amount
+                portfolio[ticker]['shares'] += transaction_shares
             else:
-                portfolio[stock]['total_cost'] -= transaction_amount
-                portfolio[stock]['shares'] -= transaction_shares
+                portfolio[ticker]['total_cost'] -= transaction_amount
+                portfolio[ticker]['shares'] -= transaction_shares
 
         response = []
-        for stock in portfolio:
-            live_price = get_live_price(stock)
-            portfolio[stock]['live_price'] = live_price
-            portfolio[stock]['total_equity'] = portfolio[stock]['shares'] * live_price
+        for ticker in portfolio:
+            live_price = get_live_price(ticker)
+            portfolio[ticker]['live_price'] = live_price
+            portfolio[ticker]['total_equity'] = portfolio[ticker]['shares'] * live_price
 
             response.append({
-                "stock": stock,
-                "live_price": portfolio[stock]['live_price'],
-                "total_equity": portfolio[stock]['total_equity'],
-                "shares": portfolio[stock]['shares'],
-                "total_cost": portfolio[stock]["total_cost"]
+                "ticker": ticker,
+                "live_price": portfolio[ticker]['live_price'],
+                "total_equity": portfolio[ticker]['total_equity'],
+                "shares": portfolio[ticker]['shares'],
+                "total_cost": portfolio[ticker]["total_cost"]
             })
 
         return jsonify(response)

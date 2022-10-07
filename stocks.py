@@ -14,7 +14,7 @@ stock_model = stock_ns.model(
     "Stock",
     {
         "id": fields.Integer(),
-        "symbol": fields.String(),
+        "ticker": fields.String(),
         "company_name": fields.String(),
         "company_logo": fields.String(),
         "industry": fields.String(),
@@ -42,7 +42,7 @@ class Stocks(Resource):
 
         data = request.get_json()
         new_stocks = Stock(
-            symbol=data.get("symbol"),
+            ticker=data.get("ticker"),
             company_name=data.get("company_name"),
             company_logo=data.get("company_logo"),
             industry=data.get("industry"),
@@ -55,19 +55,19 @@ class Stocks(Resource):
         return new_stocks, 201
 
 
-@stock_ns.route('/<string:symbol>/info')
+@stock_ns.route('/<string:ticker>/info')
 class Stocks(Resource):
 
     @stock_ns.marshal_with(stock_model)
-    def get(self, symbol):
-        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
+    def get(self, ticker):
+        stock = Stock.query.filter_by(ticker=ticker).first_or_404()
         return stock
 
-@stock_ns.route('/<string:symbol>')
+@stock_ns.route('/<string:ticker>')
 class Stocks(Resource):
     @stock_ns.marshal_with(stock_model)
-    def put(self, symbol):
-        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
+    def put(self, ticker):
+        stock = Stock.query.filter_by(symbol=ticker).first_or_404()
         data = request.get_json()
 
         stock.update(symbol=data.get("symbol"),
@@ -83,24 +83,24 @@ class Stocks(Resource):
         return stock
 
     @stock_ns.marshal_with(stock_model)
-    def delete(self, symbol):
-        stock = Stock.query.filter_by(symbol=symbol).first_or_404()
+    def delete(self, ticker):
+        stock = Stock.query.filter_by(ticker=ticker).first_or_404()
         stock.delete()
         return stock
 
-@stock_ns.route('/<string:symbol>/data')
+@stock_ns.route('/<string:ticker>/data')
 class Stocks(Resource):
 
-    def get(self, symbol):
-        return get_all_data(symbol)
+    def get(self, ticker):
+        return get_all_data(ticker)
 
-@stock_ns.route('/<string:symbol>/summary')
+@stock_ns.route('/<string:ticker>/summary')
 class Stocks(Resource):
 
-    def get(self, symbol):
-        data = get_all_data(symbol)
+    def get(self, ticker):
+        data = get_all_data(ticker)
         return {
-            "name": symbol,
+            "ticker": ticker,
             "change": data['change'],
             "change_percent": data['change_percent'],
             "high": data["high"][-1][1],
@@ -109,8 +109,8 @@ class Stocks(Resource):
             "previous_close": data["previous_close"]
         }
 
-@stock_ns.route('/<string:symbol>/predictions')
+@stock_ns.route('/<string:ticker>/predictions')
 class Stocks(Resource):
 
-    def get(self, symbol):
-        return get_predictions(symbol)
+    def get(self, ticker):
+        return get_predictions(ticker)

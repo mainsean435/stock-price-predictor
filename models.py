@@ -3,7 +3,7 @@ from exts import db
 """
 class Stock:
     id:int primary key
-    symbol: string
+    ticker: string
     company_ceo: string
     company_name: string
     company_logo: string
@@ -16,7 +16,7 @@ class Stock:
 class Stock(db.Model):
     __tablename__ = 'stocks'
     id = db.Column(db.Integer(), primary_key=True)
-    symbol = db.Column(db.String(10), nullable=False, unique=True)
+    ticker = db.Column(db.String(10), nullable=False, unique=True)
     company_name = db.Column(db.String(100), nullable=False)
     company_logo = db.Column(db.Text(), nullable=False)
     industry = db.Column(db.String(100), nullable=False)
@@ -38,7 +38,7 @@ class Stock(db.Model):
         db.session.commit()
 
     def update(self, **kwargs):
-        self.symbol = kwargs.get('ticker_symbol') or self.symbol
+        self.ticker = kwargs.get('ticker') or self.ticker
         self.company_name = kwargs.get('company_name') or self.company_name
         self.company_logo = kwargs.get('company_logo') or self.company_logo
         self.industry = kwargs.get('industry') or self.industry
@@ -82,24 +82,24 @@ class Transactions:
     name: string
     type: string
     amount: float
-    stock: string
+    ticker: string
     time_transacted: datetime
     time_created: datetime
     price_purchased_at: float
-    no_of_stocks: float
+    no_of_shares: float
 """
 
 
 class Transaction(db.Model):
     __tablename__ = 'transactions'
-    id = db.Column(db.Integer(), primary_key=True)
-    stock = db.Column(db.String(10), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    ticker = db.Column(db.String(10), nullable=False)
     type = db.Column(db.String(10))
     amount = db.Column(db.Float)
     time_transacted = db.Column(db.DateTime)
     time_created = db.Column(db.DateTime)
     price_purchased_at = db.Column(db.Float)
-    no_of_stocks = db.Column(db.Float)
+    no_of_shares = db.Column(db.Float)
 
     def save(self):
         db.session.add(self)
