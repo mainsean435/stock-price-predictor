@@ -54,7 +54,7 @@ class Transactions(Resource):
         return new_transaction, 201
 
 
-@transaction_ns.route('/rollups_by_ticker')
+@transaction_ns.route('/rollups_by_stock')
 class Transactions(Resource):
 
     def get(self):
