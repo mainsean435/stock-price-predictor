@@ -15,22 +15,22 @@ import {
 export default function AddModal({ isOpen, onClose }) {
   const [type, setType] = useState("");
   const [name, setName] = useState("");
-  const [symbol, setSymbol] = useState("");
+  const [stock, setSymbol] = useState("");
   const [amount, setAmount] = useState("");
   const [pricePurchasedAt, setPricePurchasedAt] = useState("");
   const [transactionDate, setTransactionDate] = useState("");
-  const [numberOfStocks, setNumberOfStocks] = useState("");
+  const [numberOfShares, setNumberOfShares] = useState("");
 
   const addTransaction = () => {
     const payload = JSON.stringify({
       name: name,
-      symbol: symbol,
       type: type,
       amount: amount * 100,
-      price_purchased_at: pricePurchasedAt,
-      time_created: Date.now() / 1000,
+      stock: stock,
       time_transacted: Date.parse(transactionDate) / 1000,
-      no_of_stocks: numberOfStocks,
+      time_created: Date.now() / 1000,
+      price_purchased_at: pricePurchasedAt,
+      no_of_shares: numberOfShares,
     });
     console.log(payload);
     fetch("http://127.0.0.1:5000/transactions/", {
@@ -68,7 +68,7 @@ export default function AddModal({ isOpen, onClose }) {
                 placeholder="Name"
               />
               <Input
-                value={symbol}
+                value={stock}
                 onChange={(e) => setSymbol(e.target.value)}
                 focusBorderColor="tomato"
                 variant="flushed"
@@ -96,11 +96,11 @@ export default function AddModal({ isOpen, onClose }) {
                 placeholder="Transaction Date (MM-DD-YYYY)"
               />
               <Input
-                value={numberOfStocks}
-                onChange={(e) => setNumberOfStocks(e.target.value)}
+                value={numberOfShares}
+                onChange={(e) => setNumberOfShares(e.target.value)}
                 focusBorderColor="tomato"
                 variant="flushed"
-                placeholder="Number of Stocks"
+                placeholder="Number of Shares"
               />
             </VStack>
           </ModalBody>

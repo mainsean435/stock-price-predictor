@@ -1,40 +1,40 @@
 import React from "react";
 import {
-  Text,
+  Heading,
   VStack,
   Table,
   Thead,
   Tbody,
   Tr,
   Th,
-  TableCaption,
+  TableContainer,
 } from "@chakra-ui/react";
 import TransactionItem from "./TransactionItem";
 
 export default function TransactionsTable({ transactions }) {
   return (
     <VStack>
-      <Text> Recent Transactions</Text>
-      <Table size="sm" variant="striped" colorScheme="blackAlpha" width={20}>
-        <TableCaption>All stocks buy and sell records</TableCaption>
+      <Heading size='md' margin='0px'>Recent Transactions</Heading>
+      <TableContainer>
+      <Table variant='simple'>
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>Symbol</Th>
-            <Th>Amount</Th>
-            <Th>Number of Stocks</Th>
-            <Th>Price Purchased At</Th>
+            <Th>Stock</Th>
+            <Th isNumeric>Amount</Th>
+            <Th isNumeric>No. of Shares</Th>
+            <Th isNumeric>Purchased At</Th>
             <Th>Date</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {transactions.map((tran, index) => {
+          {transactions.slice(0, 10).map((tran, index) => {
             return (
               <TransactionItem key={index} transaction={tran}></TransactionItem>
             );
           })}
         </Tbody>
       </Table>
+      </TableContainer>
     </VStack>
   );
 }

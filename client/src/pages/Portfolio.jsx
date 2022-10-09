@@ -14,7 +14,7 @@ import Summary from "../components/Summary";
 import Visualization from "../components/Visualization";
 import AddModal from "../components/AddModal";
 
-function App() {
+function Portfolio() {
   const [transactions, setTransactions] = useState([]);
   const [portfolioCost, setPortfolioCost] = useState(0);
   const [portfolioValue, setPortfolioValue] = useState(0);
@@ -73,4 +73,4 @@ function App() {
   );
 }
 
-export default App;
+export default Portfolio;

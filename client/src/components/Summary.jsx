@@ -12,7 +12,7 @@ export default function Summary({
       <Container bg="tomato">
         <VStack width={40}>
           <Text fontSize="2xl">
-            $ {Number(portfolioCost.toFixed(2)).toLocaleString()}
+            Ksh {Number(portfolioCost.toFixed(2)).toLocaleString()}
           </Text>
           <Text fontSize="xs" size="md">
             Portfolio Cost
@@ -22,7 +22,7 @@ export default function Summary({
       <Container bg="tomato">
         <VStack width={40}>
           <Text fontSize="2xl">
-            $ {Number(portfolioValue.toFixed(2)).toLocaleString()}
+            Ksh {Number(portfolioValue.toFixed(2)).toLocaleString()}
           </Text>
           <Text fontSize="xs">Portfolio Value</Text>
         </VStack>
@@ -30,7 +30,7 @@ export default function Summary({
       <Container bg="tomato">
         <VStack width={40}>
           <Text fontSize="2xl">
-            $ {Number(absoluteGain.toFixed(2)).toLocaleString()}
+            Ksh {Number(absoluteGain.toFixed(2)).toLocaleString()}
           </Text>
           <Text fontSize="xs"> Absolute Gain / Loss </Text>
         </VStack>
