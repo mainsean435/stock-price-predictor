@@ -1,4 +1,3 @@
-from distutils.command.config import config
 import pandas as pd
 from datetime import datetime
 import config
@@ -6,8 +5,8 @@ from random import randint, choice
 
 
 
-def get_all_data(symbol):
-  filepath = f"{config.BASE_DIR}/stocks_data/{symbol}.csv"
+def get_historical_data(ticker):
+  filepath = f"{config.BASE_DIR}/stocks_data/{ticker}.csv"
   df = pd.read_csv(filepath)
 
   df = df.sort_values('Date')
@@ -27,8 +26,8 @@ def get_all_data(symbol):
   return data
 
 
-def get_close_price(symbol):
-    filepath = f"{config.BASE_DIR}/stocks_data/{symbol}.csv"
+def get_closing_price(ticker):
+    filepath = f"{config.BASE_DIR}/stocks_data/{ticker}.csv"
     df = pd.read_csv(filepath)
 
     df = df.sort_values('Date')
@@ -36,8 +35,8 @@ def get_close_price(symbol):
         lambda x: datetime.strptime(x, r'%Y-%m-%d'))
     return df[['Date', ' Close']]
 
-def get_live_price(symbol):
-    data = get_all_data(symbol)
+def get_live_price(ticker):
+    data = get_historical_data(ticker)
     op = choice(["+", "-"])
     price = data['previous_close']
     price += (randint(0, 30)/10) if op == "+" else -(randint(0, 30)/10)
