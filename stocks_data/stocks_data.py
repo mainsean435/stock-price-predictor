@@ -2,7 +2,8 @@ from distutils.command.config import config
 import pandas as pd
 from datetime import datetime
 import config
-from random import randint
+from random import randint, choice
+
 
 
 def get_all_data(symbol):
@@ -37,7 +38,9 @@ def get_close_price(symbol):
 
 def get_live_price(symbol):
     data = get_all_data(symbol)
-    price = data['previous_close'] + (randint(0, 30)/10)
+    op = choice(["+", "-"])
+    price = data['previous_close']
+    price += (randint(0, 30)/10) if op == "+" else -(randint(0, 30)/10)
     return round(price, 2)
     
 
