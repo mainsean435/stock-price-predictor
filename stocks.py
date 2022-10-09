@@ -1,9 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from models import Stock
 from flask import request
-from predictor import get_predictions
 
-from stocks_data.stocks_data import get_all_data
+from stocks_data.stocks_data import get_historical_data, get_predictions
 
 
 stock_ns = Namespace('stocks', description="""
@@ -67,10 +66,10 @@ class Stocks(Resource):
 class Stocks(Resource):
     @stock_ns.marshal_with(stock_model)
     def put(self, ticker):
-        stock = Stock.query.filter_by(symbol=ticker).first_or_404()
+        stock = Stock.query.filter_by(ticker=ticker).first_or_404()
         data = request.get_json()
 
-        stock.update(symbol=data.get("symbol"),
+        stock.update(ticker=data.get("ticker"),
                      company_name=data.get("company_name"),
                      company_logo=data.get("company_logo"),
                      industry=data.get("industry"),
@@ -92,13 +91,13 @@ class Stocks(Resource):
 class Stocks(Resource):
 
     def get(self, ticker):
-        return get_all_data(ticker)
+        return get_historical_data(ticker)
 
 @stock_ns.route('/<string:ticker>/summary')
 class Stocks(Resource):
 
     def get(self, ticker):
-        data = get_all_data(ticker)
+        data = get_historical_data(ticker)
         return {
             "ticker": ticker,
             "change": data['change'],
