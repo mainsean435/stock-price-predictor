@@ -39,10 +39,10 @@ const StockInfoPage = () => {
 
     return (
       <>
-        {/* <StockChart
+        <StockChart
           title={`${ticker} Historical Prices`}
           data={stockData.closing_prices}
-        /> */}
+        />
         <StockChart
           title={`${ticker} Predicted Prices`}
           data={stockData.predictions}
