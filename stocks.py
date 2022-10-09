@@ -87,7 +87,7 @@ class Stocks(Resource):
         stock.delete()
         return stock
 
-@stock_ns.route('/<string:ticker>/data')
+@stock_ns.route('/<string:ticker>/historical_data')
 class Stocks(Resource):
 
     def get(self, ticker):
