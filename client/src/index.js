@@ -1,15 +1,14 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/main.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import ReactDOM from 'react-dom'
-import NavBar from './components/Navbar';
+import NavBar from './components/Navbar'
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
-import HomePage from './components/Home';
-import SignUpPage from './components/SignUp';
+import HomePage from './pages/Home';
+import SignUpPage from './pages/SignUp';
 import LoginPage from './pages/Login';
 import AllStocksPage from './pages/AllStocks';
-import MyWatchlistPage from './components/MyWatchlist';
-import StockInfoPage from './components/StockInfo';
+import PortfolioPage from './pages/Portfolio';
+import StockInfoPage from './pages/StockInfo';
 
 
 const App=()=>{
@@ -21,9 +20,9 @@ const App=()=>{
                     <Route path="/" element={<HomePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignUpPage />} />
-                    <Route path="/my-watchlist" element={<MyWatchlistPage />} />
-                    <Route path="/all-stocks" element={<AllStocksPage />} />
-                    <Route path="/stock/:ticker" element={<StockInfoPage title="Stock price"/>} />
+                    <Route path="/portfolio" element={<PortfolioPage />} />
+                    <Route path="/stocks" element={<AllStocksPage />} />
+                    <Route path="/stocks/:ticker" element={<StockInfoPage />} />
                 </Routes>
             </BrowserRouter>
         </main>
