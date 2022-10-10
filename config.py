@@ -9,7 +9,8 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 class Config:
     SECRET_KEY=os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS=os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS')
-    JWT_EXPIRATION_DELTA=timedelta(hours=48)
+    JWT_EXPIRATION_DELTA=timedelta(days=1)
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(days=1)
 
 
 class DevConfig(Config):
