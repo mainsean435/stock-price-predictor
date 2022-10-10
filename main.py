@@ -1,3 +1,4 @@
+from email import message
 from flask import Flask
 from flask_restx import Api
 from exts import db
@@ -6,6 +7,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from stocks import stock_ns
 from transactions import transaction_ns
+from auth import auth_ns
 from flask_cors import CORS
 
 def create_app(config):
@@ -16,6 +18,12 @@ def create_app(config):
     #Create the app object
     app=Flask(__name__,static_url_path='/',static_folder='./client/build')
     app.config.from_object(config)
+
+    @app.route('/')
+    def index():
+        message = "Hello world!"
+        return f"<h1>{message}</h1>"
+        # return app.send_static_file('index.html')
 
     #Allow cross origin policy
     CORS(app)
@@ -31,10 +39,8 @@ def create_app(config):
 
     api.add_namespace(stock_ns)
     api.add_namespace(transaction_ns)
+    api.add_namespace(auth_ns)
 
-    @app.route('/')
-    def index():
-        return app.send_static_file('index.html')
 
     @app.errorhandler(404)
     def not_found(err):

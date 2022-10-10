@@ -1,10 +1,11 @@
 from config import DevConfig as cfg
 from flask_restx import Namespace, Resource, fields
-from models import Transaction
+from models import Transaction, User
 from flask import request, jsonify
 from datetime import datetime
 from collections import defaultdict
 from sqlalchemy import create_engine
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from stocks_data.stocks_data import get_live_price
 
@@ -32,16 +33,23 @@ transaction_model = transaction_ns.model(
 class Transactions(Resource):
 
     @transaction_ns.marshal_list_with(transaction_model)
+    @jwt_required()
     def get(self):
-        transactions = Transaction.query.all()
-        transactions.sort(key=lambda x : x.time_transacted, reverse=True)
+        current_user = get_jwt_identity()
+        user = User.query.filter_by(username=current_user).first_or_404()
+        transactions = user.transactions
+        transactions.sort(key=lambda x: x.time_transacted, reverse=True)
         return transactions
 
     @transaction_ns.marshal_with(transaction_model)
     @transaction_ns.expect(transaction_model)
+    @jwt_required()
     def post(self):
         data = request.get_json()
+        current_user = get_jwt_identity()
+        user = User.query.filter_by(username=current_user).first_or_404()
         new_transaction = Transaction(
+            user_id=user.id,
             type=data.get("type"),
             amount=data.get("amount"),
             ticker=data.get("ticker"),
@@ -57,7 +65,10 @@ class Transactions(Resource):
 @transaction_ns.route('/rollups_by_stock')
 class Transactions(Resource):
 
+    @jwt_required()
     def get(self):
+        current_user = get_jwt_identity()
+        user = User.query.filter_by(username=current_user).first_or_404()
         portfolio = defaultdict(
             lambda: {
                 "shares": 0,
@@ -70,7 +81,7 @@ class Transactions(Resource):
         engine = create_engine(cfg.SQLALCHEMY_DATABASE_URI)
         with engine.connect() as con:
             cur = con.execute(
-                "SELECT ticker, type, SUM(amount)/100 AS total_amount, SUM(no_of_shares) AS total_shares FROM transactions GROUP BY ticker, type")
+                f"SELECT ticker, type, SUM(amount)/100 AS total_amount, SUM(no_of_shares) AS total_shares FROM transactions WHERE user_id={user.id} GROUP BY ticker, type")
             rows = cur.fetchall()
         for row in rows:
             ticker = row[0]
