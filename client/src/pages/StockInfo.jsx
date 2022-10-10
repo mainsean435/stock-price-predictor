@@ -1,6 +1,6 @@
 import { useState, useEffect} from "react"
 import { useParams } from "react-router-dom"
-import StockChart from "./StockChart"
+import StockChart from "../components/StockChart"
 
 
 export default function StockInfoPage(){

@@ -69,7 +69,7 @@ function Portfolio() {
           </Button>
         </VStack>
       </Center>
-    </ChakraProvider>
+    </div>
   );
 }
 
