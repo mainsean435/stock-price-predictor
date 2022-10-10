@@ -67,7 +67,7 @@ class User(db.Model):
     username = db.Column(db.String(30), nullable=False, unique=True)
     email = db.Column(db.String(60), nullable=False, unique=True)
     password = db.Column(db.Text(), nullable=False)
-    transactions = db.relationships('Transaction', backref='user')
+    transactions = db.relationship('Transaction', backref='user')
 
     def __repr__(self):
         return f"<User {self.username}>"
