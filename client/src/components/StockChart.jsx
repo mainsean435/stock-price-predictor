@@ -1,29 +1,8 @@
-import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
 import ReactHighcharts from "react-highcharts/ReactHighstock.src"
 import moment from "moment"
 
 
-const StockInfoPage = ({ title }) => {
-  const [data, setData] = useState([])
-  const { ticker } = useParams()
-
-  useEffect(() => {
-    let isMounted = true
-    const fetchData = async () => {
-      try {
-        fetch(`http://127.0.0.1:5000/stocks/${ticker}/data`)
-          .then((response) => response.json())
-          .then((data) => {
-            setData(data);
-          });
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    fetchData()
-    return () => (isMounted = false)
-  })
+const StockChart = ({title, data}) => {
 
   const options = { style: 'currency', currency: 'KES' };
   const numberFormat = new Intl.NumberFormat('en-US', options);
@@ -103,13 +82,12 @@ const StockInfoPage = ({ title }) => {
       name: 'Price',
       type: 'spline',
 
-      data: data.close,
+      data: data,
       tooltip: {
         valueDecimals: 2
       },
 
-    }]
-  };
+  }]};
   return (
     <div>
       <ReactHighcharts config={config}></ReactHighcharts>
@@ -117,5 +95,5 @@ const StockInfoPage = ({ title }) => {
   )
 }
 
-export default StockInfoPage
+export default StockChart
 
