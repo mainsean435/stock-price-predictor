@@ -67,6 +67,7 @@ class User(db.Model):
     username = db.Column(db.String(30), nullable=False, unique=True)
     email = db.Column(db.String(60), nullable=False, unique=True)
     password = db.Column(db.Text(), nullable=False)
+    transactions = db.relationships('Transaction', backref='user')
 
     def __repr__(self):
         return f"<User {self.username}>"
@@ -100,6 +101,7 @@ class Transaction(db.Model):
     time_created = db.Column(db.DateTime)
     price_purchased_at = db.Column(db.Float)
     no_of_shares = db.Column(db.Float)
+    user_id=db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def save(self):
         db.session.add(self)
