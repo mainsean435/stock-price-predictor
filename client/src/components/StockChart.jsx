@@ -2,10 +2,10 @@ import ReactHighcharts from "react-highcharts/ReactHighstock.src"
 import moment from "moment"
 
 
-const StockChart = ({title, data}) => {
-
+export default function StockChart({ title, data }) {
   const options = { style: 'currency', currency: 'KES' };
   const numberFormat = new Intl.NumberFormat('en-US', options);
+
   const config = {
     yAxis: [{
       offset: 20,
@@ -87,13 +87,9 @@ const StockChart = ({title, data}) => {
         valueDecimals: 2
       },
 
-  }]};
+    }]
+  };
   return (
-    <div>
       <ReactHighcharts config={config}></ReactHighcharts>
-    </div>
   )
 }
-
-export default StockChart
-

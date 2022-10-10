@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import StockChart from "./StockChart"
 
 
-const StockInfoPage = () => {
+export default function StockInfoPage(){
   const [stockData, setStockData] = useState({})
   const { ticker } = useParams()
   
@@ -52,8 +52,4 @@ const StockInfoPage = () => {
   
 }
 
-
-
-
-export default StockInfoPage
 
