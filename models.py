@@ -101,7 +101,7 @@ class Transaction(db.Model):
     time_created = db.Column(db.DateTime)
     price_purchased_at = db.Column(db.Float)
     no_of_shares = db.Column(db.Float)
-    user_id=db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def save(self):
         db.session.add(self)
