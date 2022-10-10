@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+from datetime import timedelta
 
 load_dotenv()
 
@@ -8,6 +9,7 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 class Config:
     SECRET_KEY=os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS=os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS')
+    JWT_EXPIRATION_DELTA=timedelta(hours=48)
 
 
 class DevConfig(Config):
