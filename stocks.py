@@ -1,8 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from models import Stock
-from flask import request
+from flask import request, jsonify
 
-from stocks_data.stocks_data import get_historical_data, get_predictions
+from stocks_data.stocks_data import get_historical_data, get_predictions, get_summary
 
 
 stock_ns = Namespace('stocks', description="""
@@ -22,7 +22,6 @@ stock_model = stock_ns.model(
         "company_website": fields.String(),
         "description": fields.String(),
         "year_founded": fields.Integer(),
-        "data": fields.String()
     }
 )
 
@@ -30,10 +29,24 @@ stock_model = stock_ns.model(
 @stock_ns.route('/')
 class Stocks(Resource):
 
-    @stock_ns.marshal_list_with(stock_model)
+    # @stock_ns.marshal_list_with(stock_model)
     def get(self):
         stocks = Stock.query.all()
-        return stocks
+        res = []
+        for stock in stocks:
+            res.append({
+                "ticker": stock.ticker,
+                "company_name": stock.company_name,
+                "company_logo": stock.company_logo,
+                "industry": stock.industry,
+                "company_ceo": stock.company_ceo,
+                "company_headquaters": stock.company_headquaters,
+                "company_website": stock.company_website,
+                "description": stock.description,
+                "year_founded": stock.year_founded,
+                "data": get_summary(stock.ticker)
+            })
+        return res
 
     @stock_ns.marshal_with(stock_model)
     @stock_ns.expect(stock_model)
@@ -60,7 +73,20 @@ class Stocks(Resource):
     @stock_ns.marshal_with(stock_model)
     def get(self, ticker):
         stock = Stock.query.filter_by(ticker=ticker).first_or_404()
+        stock = {
+                "ticker": stock.ticker,
+                "company_name": stock.company_name,
+                "company_logo": stock.company_logo,
+                "industry": stock.industry,
+                "company_ceo": stock.company_ceo,
+                "company_headquaters": stock.company_headquaters,
+                "company_website": stock.company_website,
+                "description": stock.description,
+                "year_founded": stock.year_founded,
+                "data": get_summary(ticker)
+            }
         return stock
+
 
 @stock_ns.route('/<string:ticker>')
 class Stocks(Resource):
@@ -87,11 +113,13 @@ class Stocks(Resource):
         stock.delete()
         return stock
 
+
 @stock_ns.route('/<string:ticker>/historical_data')
 class Stocks(Resource):
 
     def get(self, ticker):
         return get_historical_data(ticker)
+
 
 @stock_ns.route('/<string:ticker>/summary')
 class Stocks(Resource):
@@ -107,6 +135,7 @@ class Stocks(Resource):
             "open": data["open"][-1][1],
             "previous_close": data["previous_close"]
         }
+
 
 @stock_ns.route('/<string:ticker>/predictions')
 class Stocks(Resource):
