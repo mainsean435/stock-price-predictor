@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import pandas as pd
 from datetime import datetime
 import config
@@ -26,6 +27,17 @@ def get_historical_data(ticker):
       abs(data['change']) / data['previous_close'], 3)
   return data
 
+def get_summary(ticker):
+    data = get_historical_data(ticker)
+    return {
+        "change": data['change'],
+        "change_percent": data['change_percent'],
+        "high": data["high"][-1][1],
+        "low": data["low"][-1][-1],
+        "open": data["open"][-1][1],
+        "previous_close": data["previous_close"]
+    }
+
 
 def get_closing_price(ticker):
     filepath = f"{config.BASE_DIR}/stocks_data/historical_data/{ticker}.csv"
@@ -45,19 +57,22 @@ def get_live_price(ticker):
     return round(price, 2)
 
 
-def get_predictions(ticker, periods=365):
+def get_predictions(ticker, periods=30):
     data = get_closing_price(ticker)
     data = data.rename(columns={'Date': 'ds', ' Close': 'y'})
 
     filepath = f"{config.BASE_DIR}/stocks_data/predictions_data/{ticker}.csv"
     if f"{ticker}.csv" not in os.listdir(f"{config.BASE_DIR}/stocks_data/predictions_data/"):
-        m = Prophet(daily_seasonality=True)
-        m.fit(data)
+        m = Prophet(weekly_seasonality=True)
+        data[-3650:].to_csv(f"{config.BASE_DIR}/stocks_data/predictions_data/FOO.csv")
+        m.fit(data[-3650:])
         future = m.make_future_dataframe(periods=periods)
         prediction = m.predict(future)
-        prediction['ds'] = prediction['ds'].apply(lambda x : x.timestamp())
-        prediction.index = prediction['ds']
-        prediction.to_csv(filepath)
+        prediction = prediction[prediction['ds'].dt.dayofweek < 5]
+        # prediction.index = prediction['ds']
+        # del prediction['ds']
+        prediction[['ds', 'yhat']].to_csv(filepath)
     data = pd.read_csv(filepath)
-    return data[['ds', 'yhat']].values.tolist()[-365:]
-    
+    data['ds'] = data['ds'].apply(
+        lambda x: datetime.strptime(x, r'%Y-%m-%d').timestamp()*1000)
+    return data[['ds', 'yhat']].values.tolist()[-periods:]
