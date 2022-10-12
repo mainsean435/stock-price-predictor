@@ -1,135 +1,112 @@
-// import React, { useState } from 'react'
-// import { Form, Button, Alert } from 'react-bootstrap'
-// import { Link } from 'react-router-dom'
-// import { useForm } from 'react-hook-form'
-// import {useNavigate} from 'react-router-dom'
+import React, { useState } from 'react'
+import {useNavigate} from 'react-router-dom'
+import {Alert} from 'react-bootstrap'
 
 
-// const SignUpPage = () => {
-//     const navigate = useNavigate()
 
-//     const { register, handleSubmit, reset, formState: { errors } } = useForm()
-//     const [show,setShow]=useState(false)
-//     const [serverResponse,setServerResponse]=useState('')
+import { Button } from "@chakra-ui/button"
+import { Heading, VStack } from "@chakra-ui/layout"
+import { Formik } from "formik"
+import * as Yup from "yup"
+import TextField from "../components/TextField"
 
-//     const submitForm = (data) => {
+export default function SignUpPage() {
+    const navigate = useNavigate()
+    const [serverResponse,setServerResponse]=useState('')
+    const [show,setShow]=useState(false)
 
+    return (
+        <Formik
+            initialValues={{ username: "", password: "" }}
+            validationSchema={Yup.object({
+                username: Yup.string()
+                    .required("Username required")
+                    .min(3, "Username is too short"),
+                password: Yup.string()
+                    .required("Password required")
+                    .min(8, "Password is too short"),
+                email: Yup.string().email("invalid email").required("email required"),
+            })}
+            onSubmit={(values, actions) => {
 
-//         if (data.password === data.confirmPassword) {
+                const body = {
+                    username: values.username,
+                    email: values.email,
+                    password: values.password
+                }
+    
+                const options = {
+                    method: "POST",
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                }
+    
+                fetch('http://localhost:5000/auth/signup', options)
+                    .then(res => res.json())
+                    .then(data =>{
+                        console.log(data)
+                        setServerResponse(data.message)
+                        setShow(true)
+                        alert(serverResponse)
+                        navigate('/login')
+                    })
+                    .catch(err => console.log(err))
+                actions.resetForm()
 
+            }}
+        >
+            {formik => (
+                <VStack
+                    spacing={35}
+                    as="form"
+                    mx="auto"
+                    w={{ base: "90%", md: 500 }}
+                    h="100vh"
+                    justifyContent="center"
+                    onSubmit={formik.handleSubmit}
+                >
+                    {show?
+                    <>
+                    <Alert variant="success" onClose={() => {setShow(false)
+                        }} dismissible>
+                    <p>
+                        {serverResponse}
+                    </p>
+                    </Alert>
 
-//             const body = {
-//                 username: data.username,
-//                 email: data.email,
-//                 password: data.password
-//             }
-
-//             const options = {
-//                 method: "POST",
-//                 headers: {
-//                     'content-type': 'application/json'
-//                 },
-//                 body: JSON.stringify(body)
-//             }
-
-//             fetch('/auth/signup', options)
-//                 .then(res => res.json())
-//                 .then(data =>{
-//                     console.log(data)
-//                     setServerResponse(data.message)
-//                     setShow(true)
-//                     navigate('/login')
-//                 })
-//                 .catch(err => console.log(err))
-
-//             reset()
-//         }
-
-//         else {
-//             alert("Passwords do not match")
-//         }
-
-
-//     }
-
-
-//     return (
-//         <div className="container">
-//             <div className="form">
+                    <Heading>Sign Up</Heading>
                 
-//                {show?
-//                <>
-//                 <Alert variant="success" onClose={() => {setShow(false)
-//                 }} dismissible>
-//                 <p>
-//                    {serverResponse}
-//                 </p>
-//                 </Alert>
-
-//                 <h1>Sign Up Page</h1>
-                
-//                 </>
-//                 :
-//                 <h1>Sign Up Page</h1>
+                    </>
+                    :
+                    <Heading>Sign Up</Heading>
                
-//                }
-//                 <form>
-//                     <Form.Group>
-//                         <Form.Label>Username</Form.Label>
-//                         <Form.Control type="text"
-//                             placeholder="Your username"
-//                             {...register("username", { required: true, maxLength: 25 })}
-//                         />
+               }
 
-//                         {errors.username && <small style={{ color: "red" }}>Username is required</small>}
-//                         {errors.username?.type === "maxLength" && <p style={{ color: "red" }}><small>Max characters should be 25 </small></p>}
-//                     </Form.Group>
-//                     <br></br>
-//                     <Form.Group>
-//                         <Form.Label>Email</Form.Label>
-//                         <Form.Control type="email"
-//                             placeholder="Your email"
-//                             {...register("email", { required: true, maxLength: 80 })}
-//                         />
+                    {/* <Heading>Sign Up</Heading> */}
 
-//                         {errors.email && <p style={{ color: "red" }}><small>Email is required</small></p>}
+                    <TextField name="username"
+                        placeholder="enter username"
+                    />
 
-//                         {errors.email?.type === "maxLength" && <p style={{ color: "red" }}><small>Max characters should be 80</small></p>}
-//                     </Form.Group>
-//                     <br></br>
-//                     <Form.Group>
-//                         <Form.Label>Password</Form.Label>
-//                         <Form.Control type="password"
-//                             placeholder="Your password"
-//                             {...register("password", { required: true, minLength: 8 })}
+                    <TextField
+                        name="email"
+                        placeholder="enter email"
+                        type="email"
+                    />
 
-//                         />
+                    <TextField
+                        name="password"
+                        type="password"
+                        placeholder="enter password"
+                    />
 
-//                         {errors.password && <p style={{ color: "red" }}><small>Password is required</small></p>}
-//                         {errors.password?.type === "minLength" && <p style={{ color: "red" }}><small>Min characters should be 8</small></p>}
-//                     </Form.Group>
-//                     <br></br>
-//                     <Form.Group>
-//                         <Form.Label>Confirm Password</Form.Label>
-//                         <Form.Control type="password" placeholder="Your password"
-//                             {...register("confirmPassword", { required: true, minLength: 8 })}
-//                         />
-//                         {errors.confirmPassword && <p style={{ color: "red" }}><small>Confirm Password is required</small></p>}
-//                         {errors.confirmPassword?.type === "minLength" && <p style={{ color: "red" }}><small>Min characters should be 8</small></p>}
-//                     </Form.Group>
-//                     <br></br>
-//                     <Form.Group>
-//                         <Button as="sub" variant="primary" onClick={handleSubmit(submitForm)}>SignUp</Button>
-//                     </Form.Group>
-//                     <br></br>
-//                     <Form.Group>
-//                         <small>Already have an account, <Link to='/login'>Log In</Link></small>
-//                     </Form.Group>
-//                     <br></br>
-//                 </form>
-//             </div>
-//         </div>
-//     )
-// }
-
-// export default SignUpPage
+                    <Button type="submit" variant="outline" colorScheme="teal">
+                        Create Account
+                    </Button>
+                </VStack>
+            )}
+        </Formik>
+    )
+}
