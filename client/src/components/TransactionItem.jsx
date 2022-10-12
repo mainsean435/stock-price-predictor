@@ -7,7 +7,7 @@ export default function TransactionItem({ transaction }) {
   date = date.slice(0, date.indexOf('T'))
   return (
     <Tr>
-      <Td>{transaction["stock"]}</Td>
+      <Td>{transaction["ticker"]}</Td>
       <Td isNumeric>Ksh {transaction["amount"].toLocaleString()}</Td>
       <Td isNumeric>{transaction["no_of_shares"]}</Td>
       <Td isNumeric>Ksh {transaction["price_purchased_at"].toLocaleString()}</Td>
